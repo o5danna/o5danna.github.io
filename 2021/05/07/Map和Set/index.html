@@ -1,0 +1,124 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Map和Set · Mr.Long's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">longlongyu</div><div class="profile-signature">for me</div><div class="friends"><div>FRIENDS</div><span><a href="//github.com/Longlongyu" target="_black">friendA</a></span><span><a href="//github.com/" target="_black">friendB</a></span><span><a href="//github.com/" target="_black">friendC</a></span></div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Long's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">Map和Set</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-05-07</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="js"> js</a></span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>无论是Map还是set都只接受有Iterator 接口的数据结构,原生具备Iterator接口的数据结构有<strong>Array，String，Map，Set，函数的 arguments 对象</strong></p>
+<h2 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h2><p>在我们创建对象的时候虽然都是键值对的方式来创建但是object只能用字符串来当键，为了解决这个问题es6提出了Map的数据结构，Map的键可以是任意值比如对象，数组</p>
+<h3 id="对象作为键"><a href="#对象作为键" class="headerlink" title="对象作为键"></a>对象作为键</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">let</span> data = &#123;name:<span class="string">&quot;tony&quot;</span>,age:<span class="string">&quot;18&quot;</span>&#125;;</span><br><span class="line"><span class="built_in">let</span> m = new Map();</span><br><span class="line">m.set(data,<span class="string">&quot;person&quot;</span>)</span><br><span class="line">console.log(m)</span><br><span class="line">console.log(m.get(data))</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210507p1.png" alt="输出结果"></p>
+<h3 id="数组作为键"><a href="#数组作为键" class="headerlink" title="数组作为键"></a>数组作为键</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">let</span> m = new Map([[<span class="string">&#x27;name&#x27;</span>, <span class="string">&#x27;tony&#x27;</span>],[<span class="string">&#x27;age&#x27;</span>, <span class="string">&#x27;18&#x27;</span>],[<span class="string">&quot;like&quot;</span>,<span class="string">&quot;dance&quot;</span>,<span class="string">&quot;song&quot;</span>,<span class="string">&quot;rap&quot;</span>]])</span><br><span class="line">console.log(m)</span><br><span class="line">console.log(m.has(name))</span><br><span class="line">console.log(m.has(<span class="string">&quot;name&quot;</span>))</span><br><span class="line">console.log(m.get(<span class="string">&quot;name&quot;</span>))</span><br><span class="line">console.log(<span class="string">&quot;删除age&quot;</span>+m.delete(<span class="string">&quot;age&quot;</span>))//删除成功返回<span class="literal">true</span>失败返回<span class="literal">false</span></span><br><span class="line">console.log(m.has(<span class="string">&quot;age&quot;</span>))</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210507p2.png" alt="输出结果"></p>
+<p>在我打印m.has(name)的时候返回的值是false，因为Map查找值是要严格等于的，数字1和字符串1就是不相同的。</p>
+<p>这种创建方法其实等同于下面这个写法</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">let</span> m = [</span><br><span class="line">  [<span class="string">&#x27;name&#x27;</span>, <span class="string">&#x27;tony&#x27;</span>],</span><br><span class="line">  [<span class="string">&#x27;age&#x27;</span>, <span class="string">&#x27;18&#x27;</span>],</span><br><span class="line">  [<span class="string">&quot;like&quot;</span>,<span class="string">&quot;dance&quot;</span>,<span class="string">&quot;song&quot;</span>,<span class="string">&quot;rap&quot;</span>]</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line"><span class="built_in">let</span> map = new Map();</span><br><span class="line"></span><br><span class="line">items.forEach(</span><br><span class="line">  ([key, value]) =&gt; map.set(key, value)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="Map的键和内存地址绑定"><a href="#Map的键和内存地址绑定" class="headerlink" title="Map的键和内存地址绑定"></a>Map的键和内存地址绑定</h3><p>先看一个例子</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">let</span> a = &#123;name:<span class="string">&quot;a&quot;</span>,name:<span class="string">&quot;b&quot;</span>&#125;</span><br><span class="line">console.log(a)</span><br><span class="line"><span class="built_in">let</span> m = new Map()</span><br><span class="line"><span class="built_in">let</span> m1 = [<span class="string">&quot;a&quot;</span>];</span><br><span class="line"><span class="built_in">let</span> m2 = [<span class="string">&quot;a&quot;</span>];</span><br><span class="line">m.set(m1,<span class="string">&quot;111&quot;</span>)</span><br><span class="line">m.set(m2,<span class="string">&quot;222&quot;</span>)</span><br><span class="line">console.log(m.get(m1))</span><br><span class="line">console.log(m.get(m2))</span><br><span class="line">console.log(m)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210507p3.png" alt="输出结果"></p>
+<p>object的话键是唯一的所以后面的b覆盖了a，但是在Map里面，Map是按照内存地址来查找的，只要内存地址不同就视为不同的键。</p>
+<h3 id="一些属性"><a href="#一些属性" class="headerlink" title="一些属性"></a>一些属性</h3><p>size返回Map里键值对的个数</p>
+<p>clear清除Map里所有键值对没有返回值</p>
+<h2 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h2><p>常用来去重，数组去重，字符串去重</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">let</span> arr = [1,1,1,2,2,3,3,4,5]</span><br><span class="line"><span class="built_in">let</span> str = <span class="string">&quot;aaabbcccde&quot;</span></span><br><span class="line"><span class="built_in">let</span> a = new Set(arr)</span><br><span class="line"><span class="built_in">let</span> b = new Set(str)</span><br><span class="line">console.log([...a])</span><br><span class="line">console.log([...b].join(<span class="string">&quot;&quot;</span>))</span><br><span class="line">输出</span><br><span class="line">//[1, 2, 3, 4, 5]</span><br><span class="line">//abcde</span><br></pre></td></tr></table></figure>
+
+<h3 id="Array转换成Set"><a href="#Array转换成Set" class="headerlink" title="Array转换成Set"></a>Array转换成Set</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">let</span> array = [1, 2, 3, 4];</span><br><span class="line"><span class="built_in">let</span> <span class="built_in">set</span> = new Set(array);</span><br></pre></td></tr></table></figure>
+
+<h3 id="Set转换成Array"><a href="#Set转换成Array" class="headerlink" title="Set转换成Array"></a>Set转换成Array</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">let</span> demo = new Set([1,2,3,4]);</span><br><span class="line">Array.from(demo)</span><br></pre></td></tr></table></figure></article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="http://example.com">John Doe</a></p><p> <span>Link:  </span><a href="http://example.com/2021/05/07/Map%E5%92%8CSet/">http://example.com/2021/05/07/Map%E5%92%8CSet/</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="prevSlogan" href="/2021/05/08/%E9%98%B2%E6%8A%96%E8%8A%82%E6%B5%81/" title="防抖和节流"><span>< PreviousPost</span><br><span class="prevTitle">防抖和节流</span></a><a class="nextSlogan" href="/2021/05/06/foreach%E5%92%8Cmap/" title="forEach和map"><span>NextPost ></span><br><span class="nextTitle">forEach和map</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Map"><span class="toc-number">1.</span> <span class="toc-text">Map</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E8%B1%A1%E4%BD%9C%E4%B8%BA%E9%94%AE"><span class="toc-number">1.1.</span> <span class="toc-text">对象作为键</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E7%BB%84%E4%BD%9C%E4%B8%BA%E9%94%AE"><span class="toc-number">1.2.</span> <span class="toc-text">数组作为键</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Map%E7%9A%84%E9%94%AE%E5%92%8C%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%E7%BB%91%E5%AE%9A"><span class="toc-number">1.3.</span> <span class="toc-text">Map的键和内存地址绑定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%B1%9E%E6%80%A7"><span class="toc-number">1.4.</span> <span class="toc-text">一些属性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Set"><span class="toc-number">2.</span> <span class="toc-text">Set</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Array%E8%BD%AC%E6%8D%A2%E6%88%90Set"><span class="toc-number">2.1.</span> <span class="toc-text">Array转换成Set</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Set%E8%BD%AC%E6%8D%A2%E6%88%90Array"><span class="toc-number">2.2.</span> <span class="toc-text">Set转换成Array</span></a></li></ol></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>element-ui的小坑 · Mr.Long's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">longlongyu</div><div class="profile-signature">for me</div><div class="friends"><div>FRIENDS</div><span><a href="//github.com/Longlongyu" target="_black">friendA</a></span><span><a href="//github.com/" target="_black">friendB</a></span><span><a href="//github.com/" target="_black">friendC</a></span></div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Long's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">element-ui的小坑</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-04-10</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="ui"> ui</a></span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>项目里用到了elementui以前都是用Bootstrap，来记录一下elementui遇到的一些小问题</p>
+<h2 id="select选择器"><a href="#select选择器" class="headerlink" title="select选择器"></a>select选择器</h2><p>做下拉菜单的时候input输入框点击事件触发2次，造成资源浪费,让我们看一下官方文档</p>
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210412p1.png" alt="select"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;el-select :disabled = chooseFlag v-model=<span class="string">&quot;person.organName&quot;</span> placeholder=<span class="string">&quot;选择机构名称&quot;</span> clearable style=<span class="string">&quot;width:230px&quot;</span> @visible-change=<span class="string">&quot;getorganName(<span class="variable">$event</span>)&quot;</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>然后这里的$event在第一次点击展示列表的时候打印的是true，当列表展示出来点击选择好的列表后打印的是false，所以只要判断$event的状态就可以调用一次</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">getOrganState(callback)&#123;</span><br><span class="line">	if(callback)&#123;</span><br><span class="line">		//alert(callback)</span><br><span class="line">	&#125;else&#123;</span><br><span class="line">		在这里调用接口</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样getOrganState这个方法会被执行2次但是接口只调用一次</p>
+<p>查阅了其他资料发现visible-change这个函数里面第一个是回调参数第二个才是自己定义的参数也就是说function（boolean，function2），判断boolean值来执行function2，不配置function2就会执行两次</p>
+<h2 id="DatePicker日期选择器"><a href="#DatePicker日期选择器" class="headerlink" title="DatePicker日期选择器"></a>DatePicker日期选择器</h2><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210412p2.png" alt="DatePicker"></p>
+<p>这个日期选择器选择完毕之后当你点击叉号取消的时候变量的值是null，这里我是在校验的时候发现的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(this.person.timer == <span class="string">&quot;&quot;</span>)&#123;//点击叉号后this.person.timer == null</span><br><span class="line">	console.log(<span class="string">&quot;我是空值&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码在我不选择日期的时候会执行，但是当我选择日期然后点击取消之后就不会执行，因为选择之后点击叉号this.person.timer变成了null，所以没有运行。</p>
+<h3 id="拓展验证日期"><a href="#拓展验证日期" class="headerlink" title="拓展验证日期"></a>拓展验证日期</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;el-date-picker</span><br><span class="line">    v-model=<span class="string">&quot;person.entrytimeLeft&quot;</span></span><br><span class="line">    <span class="built_in">type</span>=<span class="string">&quot;date&quot;</span></span><br><span class="line">    value-format=<span class="string">&quot;yyyy-MM-dd&quot;</span></span><br><span class="line">    :picker-options = pickerOptions0//添加这个属性</span><br><span class="line">    placeholder=<span class="string">&quot;选择日期&quot;</span>&gt;</span><br><span class="line">&lt;/el-date-picker&gt;</span><br><span class="line">//下面是data的内容校验的标准是只能选择距离今天日期的3年内的日期，day我没有考虑平年闰年的问题有需要可以修改day来解决</span><br><span class="line">pickerOptions0: &#123;</span><br><span class="line">  disabledDate: (time) =&gt; &#123;</span><br><span class="line">    <span class="built_in">let</span> day = 365 * 24 * 3600 * 1000 * 3;</span><br><span class="line">    <span class="built_in">return</span> time.getTime() &lt; Date.now() - day || time.getTime() &gt; Date.now() + day</span><br><span class="line">  &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="dialog弹框"><a href="#dialog弹框" class="headerlink" title="dialog弹框"></a>dialog弹框</h2><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210412p3.png" alt="dialog"></p>
+<p>虽然有能实现嵌套的办法，但是最好还是不要用嵌套，我用的是两个平级放置的dialog，都是添加的append-to-body，官方既然说了是绑定了body我就直接写在body下了，显得好看点也方便找，之前不添加这个值总是出现奇怪的触发。</p>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="http://example.com">John Doe</a></p><p> <span>Link:  </span><a href="http://example.com/2021/04/10/element-ui%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B/">http://example.com/2021/04/10/element-ui%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B/</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="prevSlogan" href="/2021/04/19/Huffman%E7%BC%96%E7%A0%81/" title="Huffman编码"><span>< PreviousPost</span><br><span class="prevTitle">Huffman编码</span></a><a class="nextSlogan" href="/2021/02/15/%E6%B7%B1%E6%B5%85%E6%8B%B7%E8%B4%9D/" title="关于深浅拷贝"><span>NextPost ></span><br><span class="nextTitle">关于深浅拷贝</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#select%E9%80%89%E6%8B%A9%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">select选择器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DatePicker%E6%97%A5%E6%9C%9F%E9%80%89%E6%8B%A9%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">DatePicker日期选择器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%93%E5%B1%95%E9%AA%8C%E8%AF%81%E6%97%A5%E6%9C%9F"><span class="toc-number">2.1.</span> <span class="toc-text">拓展验证日期</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dialog%E5%BC%B9%E6%A1%86"><span class="toc-number">3.</span> <span class="toc-text">dialog弹框</span></a></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>关于深浅拷贝 · Mr.Long's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">longlongyu</div><div class="profile-signature">for me</div><div class="friends"><div>FRIENDS</div><span><a href="//github.com/Longlongyu" target="_black">friendA</a></span><span><a href="//github.com/" target="_black">friendB</a></span><span><a href="//github.com/" target="_black">friendC</a></span></div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Long's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">关于深浅拷贝</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-02-15</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="js"> js</a></span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>先前在项目里面遇到一个现象代码如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&lt;body&gt;</span><br><span class="line">&lt;div id=<span class="string">&quot;app&quot;</span>&gt;</span><br><span class="line">  name&lt;input v-model=person.name&gt; //绑定对象的name</span><br><span class="line">  value&lt;input v-model=value&gt;       //绑定一个字符串</span><br><span class="line">  &lt;button @click=<span class="string">&quot;check&quot;</span>&gt;push进对象&lt;/button&gt;</span><br><span class="line">  &lt;div&gt;&#123;&#123; msg &#125;&#125;&lt;/div&gt;        //点击后显示[ &#123; <span class="string">&quot;name&quot;</span>: <span class="string">&quot;李白&quot;</span> &#125;,<span class="string">&quot;字符串&quot;</span> ]</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">new Vue(&#123;</span><br><span class="line">  el:<span class="string">&quot;#app&quot;</span>,</span><br><span class="line">  data:&#123;</span><br><span class="line">    msg:[],</span><br><span class="line">    person:&#123;</span><br><span class="line">      name:<span class="string">&quot;李白&quot;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    value:<span class="string">&quot;字符串&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    <span class="function"><span class="title">check</span></span>()&#123;</span><br><span class="line">      this.msg.push(this.person)</span><br><span class="line">      this.msg.push(this.value)</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210318p1.jpg" alt=" "><br>稍微修改了下大致这个意思，当我把这两个输入框的内容push进msg这个数组后，显示“[ { “name”: “李白” },”字符串” ]”，随后我在输入框修改了对象name的值数组msg里面的数据也同步进行了修改，但是修改value的数值msg里的数据没有进行动态修改。</p>
+<p>第一想法就是我把对象push进了一个数组他只是给这个数组添加了一个指针，指针指向了对象里的值，两个指针都指向同一个堆，所以这个栈进行了修改后，数组的值和对象的值都会进行修改<br>一句话概括就是push对对象里的内容进行了<strong>浅拷贝</strong></p>
+<p>为了验证我的想法找了一个深拷贝方法然后再次push看看有没有进行绑定</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">&lt;body&gt;</span><br><span class="line">&lt;div id=<span class="string">&quot;app&quot;</span>&gt;</span><br><span class="line">  &lt;input v-model=person.name&gt; //绑定对象的name</span><br><span class="line">  &lt;input v-model=value&gt;       //绑定一个字符串</span><br><span class="line">  &lt;button @click=<span class="string">&quot;check&quot;</span>&gt;push进对象&lt;/button&gt;</span><br><span class="line">  &lt;div&gt;&#123;&#123; msg &#125;&#125;&lt;/div&gt;        //点击后显示[ &#123; <span class="string">&quot;name&quot;</span>: <span class="string">&quot;李白&quot;</span> &#125;, &#123; <span class="string">&quot;name&quot;</span>: <span class="string">&quot;李白&quot;</span> &#125;, <span class="string">&quot;字符串&quot;</span> ]</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">new Vue(&#123;</span><br><span class="line">  el:<span class="string">&quot;#app&quot;</span>,</span><br><span class="line">  data:&#123;</span><br><span class="line">    msg:[],</span><br><span class="line">    person:&#123;</span><br><span class="line">      name:<span class="string">&quot;李白&quot;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    value:<span class="string">&quot;字符串&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  methods: &#123;</span><br><span class="line">    <span class="function"><span class="title">check</span></span>()&#123;</span><br><span class="line">      this.msg.push(this.deepClone(this.person))</span><br><span class="line">      this.msg.push(this.person)</span><br><span class="line">      this.msg.push(this.value)</span><br><span class="line">    &#125;,</span><br><span class="line">    deepClone(obj)&#123;</span><br><span class="line">    <span class="built_in">let</span> objClone = Array.isArray(obj)?[]:&#123;&#125;;</span><br><span class="line">    <span class="keyword">if</span>(obj &amp;&amp; typeof obj===<span class="string">&quot;object&quot;</span>)&#123;</span><br><span class="line">        <span class="keyword">for</span>(key <span class="keyword">in</span> obj)&#123;</span><br><span class="line">            <span class="keyword">if</span>(obj.hasOwnProperty(key))&#123;</span><br><span class="line">                //判断ojb子元素是否为对象，如果是，递归复制</span><br><span class="line">                <span class="keyword">if</span>(obj[key]&amp;&amp;typeof obj[key] ===<span class="string">&quot;object&quot;</span>)&#123;</span><br><span class="line">                    objClone[key] = deepClone(obj[key]);</span><br><span class="line">                &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                    //如果不是，简单复制</span><br><span class="line">                    objClone[key] = obj[key];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">return</span> objClone;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210318p2.jpg" alt=" "><br>当我再次push后修改输入框msg没有改变，好耶罪魁祸首是浅拷贝</p>
+<h1 id="深浅拷贝"><a href="#深浅拷贝" class="headerlink" title="深浅拷贝"></a>深浅拷贝</h1><p>深拷贝其实是针对于对象和数组的，个人认为区别就是在拷贝的时候有没有在堆里面开辟一个独立的空间，上面的例子也不难看出来其实浅拷贝只添加了一个指针让指针指向另一个数据的堆里面</p>
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210318p3.jpg" alt=" "></p>
+<p>概念就这么个概念，更详细的东西可以参考<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/1c142ec2ca45">https://www.jianshu.com/p/1c142ec2ca45</a> 这个文章</p>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="http://example.com">John Doe</a></p><p> <span>Link:  </span><a href="http://example.com/2021/02/15/%E6%B7%B1%E6%B5%85%E6%8B%B7%E8%B4%9D/">http://example.com/2021/02/15/%E6%B7%B1%E6%B5%85%E6%8B%B7%E8%B4%9D/</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="prevSlogan" href="/2021/04/10/element-ui%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B/" title="element-ui的小坑"><span>< PreviousPost</span><br><span class="prevTitle">element-ui的小坑</span></a><a class="nextSlogan" href="/2021/01/01/%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5/" title="公钥和私钥"><span>NextPost ></span><br><span class="nextTitle">公钥和私钥</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><div class="toc-wrapper" style="top: 70vh;"><div class="toc-catalog"><i class="fa fa-list"> </i><span>CATALOG</span></div><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B7%B1%E6%B5%85%E6%8B%B7%E8%B4%9D"><span class="toc-number">1.</span> <span class="toc-text">深浅拷贝</span></a></li></ol></div><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>

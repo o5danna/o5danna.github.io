@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Mr.Long's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">longlongyu</div><div class="profile-signature">for me</div><div class="friends"><div>FRIENDS</div><span><a href="//github.com/Longlongyu" target="_black">friendA</a></span><span><a href="//github.com/" target="_black">friendB</a></span><span><a href="//github.com/" target="_black">friendC</a></span></div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Long's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1>Mr.Long's Blog</h1><h5>Welcome to my Blog!</h5><div class="intro-social"><a class="fa fa-github" href="//github.com/" target="_blank" title="github"></a><a class="fa fa-weibo" href="//www.weibo.com" target="_blank" title="weibo"></a><a class="fa fa-facebook" href="//www.facebook.com" target="_blank" title="facebook"></a><a class="fa fa-twitter" href="//twitter.com" target="_blank" title="twitter"></a><a class="fa fa-rss" href="/atom.xml" target="_blank" title="rss"></a></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><section id="recent-posts"><div class="recent-post-item"><div class="post-title"><a href="/2021/02/15/%E6%B7%B1%E6%B5%85%E6%8B%B7%E8%B4%9D/">关于深浅拷贝</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-02-15T08:06:37.000Z">2021-02-15</time></div><div class="recent-post-content"><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210318p3.jpg" alt="深浅拷贝区别"></p></div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="js"> js</a></div><div class="read-more"><a class="more" href="/2021/02/15/%E6%B7%B1%E6%B5%85%E6%8B%B7%E8%B4%9D/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/01/01/%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5/">公钥和私钥</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-01-01T08:06:37.000Z">2021-01-01</time></div><div class="recent-post-content"><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210101p5.png" alt="非对称加密"></p></div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="网络安全"> 网络安全</a></div><div class="read-more"><a class="more" href="/2021/01/01/%E5%85%AC%E9%92%A5%E5%92%8C%E7%A7%81%E9%92%A5/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2020/12/10/%E6%89%8B%E6%9C%BA%E4%BF%A1%E5%8F%B7%E5%92%8C%E4%B8%89%E8%A7%92%E6%95%88%E6%9E%9C/">手机信号和三角形效果</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2020-12-10T08:06:37.000Z">2020-12-10</time></div><div class="recent-post-content"><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20201210.png" alt="效果图"></p></div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="css"> css</a></div><div class="read-more"><a class="more" href="/2020/12/10/%E6%89%8B%E6%9C%BA%E4%BF%A1%E5%8F%B7%E5%92%8C%E4%B8%89%E8%A7%92%E6%95%88%E6%9E%9C/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2020/11/20/%E5%85%B3%E4%BA%8E%E5%89%8D%E7%AB%AF%E5%92%8C%E5%90%8E%E7%AB%AF/">关于前端和后端的理解</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2020-11-20T08:06:37.000Z">2020-11-20</time></div><div class="recent-post-content">在公司里面前几天还轻松，后来上司给工作的时候我发现我们这边没有后端工程师，因此产生的问题后面再说。我问过不少人怎么定义的这个前端，他们都按照自己意思去理解的，我也查过没有什么比较统一的定义，写前端都能写，我最早接触的java web，后来才深入了解js，html，css这三件套的，当时我第一想法就是用三件套来写前端然后用java写后端，但是这也导致了后来我对于前端后端的划分不明确，下面都是我自己理解的内容。
+前端说法有很多种，我认为比较通俗的理解就是js是骨骼，html是身体组织器官，css是皮肤是化妆品，或者说点开一个连接打开一个app，从你看到这个app图标–&gt;点击弹出窗口–&gt; ...</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="杂谈"> 杂谈</a></div><div class="read-more"><a class="more" href="/2020/11/20/%E5%85%B3%E4%BA%8E%E5%89%8D%E7%AB%AF%E5%92%8C%E5%90%8E%E7%AB%AF/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2020/10/11/%E6%AF%9B%E7%8E%BB%E7%92%83%E6%95%88%E6%9E%9C/">毛玻璃效果</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2020-10-11T08:06:37.000Z">2020-10-11</time></div><div class="recent-post-content"><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20201011.png" alt="毛玻璃效果"></p></div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="css"> css</a></div><div class="read-more"><a class="more" href="/2020/10/11/%E6%AF%9B%E7%8E%BB%E7%92%83%E6%95%88%E6%9E%9C/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2020/09/11/%E4%BB%A5%E5%89%8D%E7%9A%84%E4%B8%80%E4%BA%9Bcss%E6%A1%88%E4%BE%8B/">以前的css案例</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2020-09-11T08:06:37.000Z">2020-09-11</time></div><div class="recent-post-content"><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20200911p1.jpg" alt="css"></p></div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="css"> css</a></div><div class="read-more"><a class="more" href="/2020/09/11/%E4%BB%A5%E5%89%8D%E7%9A%84%E4%B8%80%E4%BA%9Bcss%E6%A1%88%E4%BE%8B/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2020/08/20/vuecli4%E4%BB%A3%E7%90%86%E5%92%8Caxios/">用vuecli4代理和axios请求</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2020-08-20T08:06:37.000Z">2020-08-20</time></div><div class="recent-post-content">我选择是不用vuex，使用vue-rounter，css用的stylus预处理，所以vuecli4比起3除了依赖要求版本高了点目前我是没踩到什么大坑，不过我之前重构app是用的mock数据，这次我选择用axios，前面文章也试过node+axios了，的确很好用，所以我这里还是用axios。
+
+这里返回的数据是上面的链接’https://c-ssl.duitang.com/uploads/item/201808/21/20180821084606_oujdt.jpg ‘,下面上代码
+12345678910111213141516171819202122232425262728293031323 ...</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="vue"> vue</a></div><div class="read-more"><a class="more" href="/2020/08/20/vuecli4%E4%BB%A3%E7%90%86%E5%92%8Caxios/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2020/08/18/node%E7%88%AC%E5%9B%BE/">node爬图</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2020-08-17T16:19:37.000Z">2020-08-18</time></div><div class="recent-post-content">在进入主题之前想先说一下deno，当初看到deno介绍第一印象就是一个集成的工具，第二印象就是便利，node需要导入的东西，在deno里是全局的能直接用了，deno异步使用promise，node则是回调，而且没有了node_modules，现在的水平也研究不了多深的东西，直观的来说我还是蛮看好deno的，虽然我不觉得node多麻烦但是谁不想要更方便更便捷的工具呐。
+思路首先获得图片地址，然后下载。怎么获得图片地址，1.jsonp （jq+ajax/vue.js）2.cors 我用的axios，因为方案1出了一个minetype是严格模式什么的报错没能解决然后用cors后端服务器没有设置’Ac ...</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="node"> node</a></div><div class="read-more"><a class="more" href="/2020/08/18/node%E7%88%AC%E5%9B%BE/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2020/08/16/pixiv%E6%89%8B%E6%9C%BA%E7%AB%AF%E5%AE%8C%E6%88%90/">pixiv手机端完成</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2020-08-16T08:06:37.000Z">2020-08-16</time></div><div class="recent-post-content">完成了全部的样式，’主页’’最新’’搜索’是主要页面，功能方面没有去实现，比如搜索输入了内容也不会有响应，这段时间应该不会再去在css方向下功夫了，前面也有爬到图时候是来弄一个比较完整的玩具了，目前还没想好什么主题的，电商类的做多了，要不微信小程序什么的，但是没钱买服务器，要不就用爬到的堆糖的图来写堆糖。
+
+</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="css"> css</a></div><div class="read-more"><a class="more" href="/2020/08/16/pixiv%E6%89%8B%E6%9C%BA%E7%AB%AF%E5%AE%8C%E6%88%90/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2020/08/08/button%E5%88%87%E6%8D%A2%E6%8C%89%E9%92%AE/">按钮样式</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2020-08-08T06:39:37.000Z">2020-08-08</time></div><div class="recent-post-content"><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/HH20208.8.gif" alt="Button"></p></div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="css"> css</a></div><div class="read-more"><a class="more" href="/2020/08/08/button%E5%88%87%E6%8D%A2%E6%8C%89%E9%92%AE/#more">ReadMore</a></div><hr></div></section><nav class="cxo-page-nav"><a class="extend prev" rel="prev" href="/">&amp;#60; PREV</a><a class="page-number" href="/">1</a><span class="page-number current">2</span></nav></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>

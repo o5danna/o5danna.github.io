@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="John Doe"><meta name="renderer" content="webkit"><meta name="copyright" content="John Doe"><meta name="keywords" content="Hexo"><meta name="description" content=""><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Mr.Long's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/favicon.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/cat.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">longlongyu</div><div class="profile-signature">for me</div><div class="friends"><div>FRIENDS</div><span><a href="//github.com/Longlongyu" target="_black">friendA</a></span><span><a href="//github.com/" target="_black">friendB</a></span><span><a href="//github.com/" target="_black">friendC</a></span></div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg.png);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">Mr.Long's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1>Mr.Long's Blog</h1><h5>Welcome to my Blog!</h5><div class="intro-social"><a class="fa fa-github" href="//github.com/" target="_blank" title="github"></a><a class="fa fa-weibo" href="//www.weibo.com" target="_blank" title="weibo"></a><a class="fa fa-facebook" href="//www.facebook.com" target="_blank" title="facebook"></a><a class="fa fa-twitter" href="//twitter.com" target="_blank" title="twitter"></a><a class="fa fa-rss" href="/atom.xml" target="_blank" title="rss"></a></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><section id="recent-posts"><div class="recent-post-item"><div class="post-title"><a href="/2021/05/10/%E4%BB%A5%E5%89%8D%E7%9A%84%E6%80%BB%E7%BB%93%E7%9A%84%E7%AC%94%E8%AE%B0/">整理笔记</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-05-10T06:04:07.973Z">2021-05-10</time></div><div class="recent-post-content">疫情期间搬完砖在家蛮闲的抽空整理下以前的笔记
+数字类型和字符串类型的转换一般字符串和数字转换首先想到的是tostring()和parseInt()，其实还有更直接的办法直接+-，下面是个例子。
+123let  a = 10;//numberlet  b = &quot;5&quot;//stringconsole.log(typeof (a+&quot;&quot;),typeof (b-0))//输出string number
+
+以前弄音乐播放器踩到的坑一开始看-0和+” “感觉没用省略了之后发现一堆报错，关于为什么能转换的原理想了解的可以去查一下js隐式转换
+取整这个方法说白了就是把浮点数 ...</div><div class="read-more"><a class="more" href="/2021/05/10/%E4%BB%A5%E5%89%8D%E7%9A%84%E6%80%BB%E7%BB%93%E7%9A%84%E7%AC%94%E8%AE%B0/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/05/10/%E7%AE%80%E5%8D%95%E5%86%99%E4%BA%86%E4%B8%8Bpixiv/">用pixiv做简单的css练习</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-05-10T06:04:07.967Z">2021-05-10</time></div><div class="recent-post-content">上周学累了然后玩手机的时候突然想找东西练练手然后找了我最喜欢的一个插画网站来练手，目前完成了大概一半？因为蛮简单的所以无论完成还是没完成我就不打算发源代码了，本次练习的目的主要是练习自己css技能，因为前段时间的一个面试css问的一堆但是我css都是用的Bootstrap，所以回答的可能不好（然而事实！是太紧张了紧张的要死要死要死，问的mvvm问题也没回答好，明明自己毕设都是用的mvvm模式来实现的，光这个模式我都查了一堆资料，嘴笨啊，改天买本书练练口才，学学吹b）。本次练习的目的是锻炼css技能所以js部分会弱化以后有机会就用vuecli来写完整
+
+其实论单个的话就是左侧滑动列表、三个可切换 ...</div><div class="read-more"><a class="more" href="/2021/05/10/%E7%AE%80%E5%8D%95%E5%86%99%E4%BA%86%E4%B8%8Bpixiv/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/05/10/%E6%90%AD%E5%BB%BA%E9%81%87%E5%90%8E%E5%88%B0%E7%9A%84%E5%B0%8F%E9%97%AE%E9%A2%98/">搭建后遇到的小问题</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-05-10T06:04:07.963Z">2021-05-10</time></div><div class="recent-post-content">简单记录一下遇到的小问题吧，大部分的问题bing一下就好了，剩下的小问题记录下给后人乘凉
+基于hexo+GitHub搭建首先我是参考了Github + Jekyll然后搭建的过程发现有点繁琐，所以我就选择了GitHub + hexo，主题是用的Longlongyu的主题，遇到的两个问题参考麻薯大佬搞定的。
+小问题搭建没遇到什么问题，需要注意的地方就是ssh和hexo的_config.yml的配置，其他的都按照教程一步一步来就好了,我踩的第一个坑是favicon的一个问题.
+1&lt;link rel=&quot;icon href=&quot;/img/assest/o5_ico.ico&qu ...</div><div class="read-more"><a class="more" href="/2021/05/10/%E6%90%AD%E5%BB%BA%E9%81%87%E5%90%8E%E5%88%B0%E7%9A%84%E5%B0%8F%E9%97%AE%E9%A2%98/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/05/10/pixiv%E6%94%B6%E8%97%8F%E6%8C%89%E9%92%AE/">pixiv收藏按钮</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-05-10T06:04:07.961Z">2021-05-10</time></div><div class="recent-post-content">逛b站的时候发现了很酷炫的效果点进去看了看，css视差滚动当时看这个视频的时候自己脑子里也有实现的思路，下意识的是使用js，但是这个视频里只用了css，发现自己思路局限在使用js解决问题然后又去看了看css3文档有些感悟，顺带写了个玩具练练
+html+css+js看过很多人都是把html+css+js比作一个人，html组成人的骨骼css组成人的皮肤js组成人的器官，看了下我以前写的东西实现动画或者切换的效果都是使用js（或者jq）来实现动画效果当初虽然是直接学的html5和css3但是并没有讲新的特性，基本都是课下自学的新特性，这里不讲出了什么新特性。出现的这些特性使原来需要js/jq或者其 ...</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="css"> css</a></div><div class="read-more"><a class="more" href="/2021/05/10/pixiv%E6%94%B6%E8%97%8F%E6%8C%89%E9%92%AE/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/05/10/hello-world/">Hello World</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-05-10T04:33:19.164Z">2021-05-10</time></div><div class="recent-post-content">测试修改20210510Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
+Quick StartCreate a new post1$ hexo new &quot;My New Post&quot;
+
+More info: Writing
+Run serve ...</div><div class="read-more"><a class="more" href="/2021/05/10/hello-world/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/05/08/%E9%98%B2%E6%8A%96%E8%8A%82%E6%B5%81/">防抖和节流</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-05-08T08:06:37.000Z">2021-05-08</time></div><div class="recent-post-content">做项目的时候因为单位的网真的非常非常非常差劲，所以请求接口的时候经常会有超时的情况然后我请求超时之后不想再手动触发了，但是一直请求等会后端就越桌子来打人了所以就想用节流来写请求。
+用一句话来概括什么是防抖什么是节流
+防抖：就是一个读条的魔法师，规定时间内被再次触发就要重新读条，读完才执行
+节流：就是射击游戏，规定时间内无论触发多少次也会在指定时间后执行
+防抖12345678910111213function debounce(func, wait) &#123;    var timeout;    return function () &#123;        var context =  ...</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="js"> js</a></div><div class="read-more"><a class="more" href="/2021/05/08/%E9%98%B2%E6%8A%96%E8%8A%82%E6%B5%81/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/05/07/Map%E5%92%8CSet/">Map和Set</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-05-07T06:39:37.000Z">2021-05-07</time></div><div class="recent-post-content">无论是Map还是set都只接受有Iterator 接口的数据结构,原生具备Iterator接口的数据结构有Array，String，Map，Set，函数的 arguments 对象
+Map在我们创建对象的时候虽然都是键值对的方式来创建但是object只能用字符串来当键，为了解决这个问题es6提出了Map的数据结构，Map的键可以是任意值比如对象，数组
+对象作为键12345let data = &#123;name:&quot;tony&quot;,age:&quot;18&quot;&#125;;let m = new Map();m.set(data,&quot;person&quot;)c ...</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="js"> js</a></div><div class="read-more"><a class="more" href="/2021/05/07/Map%E5%92%8CSet/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/05/06/foreach%E5%92%8Cmap/">forEach和map</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-05-06T06:39:37.000Z">2021-05-06</time></div><div class="recent-post-content">关于foreach有很多说foreach不能改变数组内的东西，但是我前段时间用foreach添加，检索很多东西都是使用的foreach，我看同事大部分都使用foreach的val和index很少来使用第三的参数。
+首先看看foreach说明123456array.forEach(function(currentValue, index, arr), thisValue)function(currentValue, index, arr)必选currentValue 必选当前元素index 可选元素索引值arr 数组本身thisValue 可选。传递给函数的值一般用 &quot;this&quo ...</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="js"> js</a></div><div class="read-more"><a class="more" href="/2021/05/06/foreach%E5%92%8Cmap/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/04/19/Huffman%E7%BC%96%E7%A0%81/">Huffman编码</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-04-19T06:39:37.000Z">2021-04-19</time></div><div class="recent-post-content">gzip压缩原理，首先来储存一个“kirito”这个字符串，编码长度为18
+如果我根据使用频率来把使用频率高的字母编号为变短，使用频率低的字母编号长一点，会不会减少编码长度
+下面我用human编码来给每个字段编号
+
+
+编码长度为 3x4+1x2 = 14
+这个哈夫曼树构建需要一个在每次相加后的结果再次从小到大排序。
+参考这个文章后记录的笔记
+</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="算法"> 算法</a></div><div class="read-more"><a class="more" href="/2021/04/19/Huffman%E7%BC%96%E7%A0%81/#more">ReadMore</a></div><hr></div><div class="recent-post-item"><div class="post-title"><a href="/2021/04/10/element-ui%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B/">element-ui的小坑</a></div><div class="post-time"><i class="fa fa-table"></i><time datetime="2021-04-10T06:39:37.000Z">2021-04-10</time></div><div class="recent-post-content">项目里用到了elementui以前都是用Bootstrap，来记录一下elementui遇到的一些小问题
+select选择器做下拉菜单的时候input输入框点击事件触发2次，造成资源浪费,让我们看一下官方文档
+
+1&lt;el-select :disabled = chooseFlag v-model=&quot;person.organName&quot; placeholder=&quot;选择机构名称&quot; clearable style=&quot;width:230px&quot; @visible-change=&quot;getorganName($event)&quot; ...</div><div class="recent-post-tags"><a class="post-tag fa fa-tag" href="javascript:void(0)" date-tags="ui"> ui</a></div><div class="read-more"><a class="more" href="/2021/04/10/element-ui%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BA%8B/#more">ReadMore</a></div><hr></div></section><nav class="cxo-page-nav"><span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">NEXT &amp;#62;</a></nav></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>
