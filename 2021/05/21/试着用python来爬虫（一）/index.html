@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="o5danna"><meta name="renderer" content="webkit"><meta name="copyright" content="o5danna"><meta name="keywords" content="o5danna"><meta name="description" content="o5danna"><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>用python写爬虫（一） · o5danna's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/o5_ico.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/o5danna.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">o5danna</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg3.jpg);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">o5danna's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">用python写爬虫（一）</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-05-21</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="python"> python</a></span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>最早的博客里面有模仿pixiv app的样式当时是使用的node爬图，目标网站是国内的堆糖很简单，然后早就听说python在爬图的大名了，当时找node爬图搜索结果都是关于python来爬图的，最近工作也缓了下来，所以来研究下python是怎么爬的，虽然工具不一样但是原理应该都是一样的。</p>
+<span id="more"></span>
+
+<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>目标网站：y站（偶尔国内无法访问）</p>
+<p>工具：python3.0+</p>
+<p>目的：批量下载<strong>大图</strong>至本地</p>
+<h2 id="一般流程"><a href="#一般流程" class="headerlink" title="一般流程"></a>一般流程</h2><p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210521.png" alt="小图页面"></p>
+<p>首先进来之后就会出现图片列表，这些不是我们的目标图片，这些是经过压缩的小图，做过前端都知道为了让图片更块的加载出来在不影响用户浏览的情况下把一部分图进行压缩，加快页面加载提升用户体验一般是属于优化部分的内容（例京东，淘宝），目标图片在我点击这个图片后另一个页面里</p>
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210521p2.png" alt="大图页面"></p>
+<p>跳转到这个页面之后我需要的链接就展示出来了</p>
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>现在我知道了如果我想要拿到全部首页的大图我需要每个小图都点进去然后找到目标链接下载。</p>
+<p>也就是说我需要拿到首页小图的页面，然后再用首页小图的链接进入大图页面然后再拿到链接下载图片。</p>
+<p>这流程也太麻烦了，下载一张图需要从整个网页的标签里面找到目标链接，能不能通过首页小图直接拿到大图链接能。</p>
+<p>好让我们观察一下</p>
+<p><a target="_blank" rel="noopener" href="https://assets.yande.re/data/preview/6b/78/6b78f654de9c1d3b3fe9eddac0fe7f7e.jpg">https://assets.yande.re/data/preview/6b/78/6b78f654de9c1d3b3fe9eddac0fe7f7e.jpg</a></p>
+<p><a target="_blank" rel="noopener" href="https://files.yande.re/image/6b78f654de9c1d3b3fe9eddac0fe7f7e/yande.re%20789208%20tagme.jpg">https://files.yande.re/image/6b78f654de9c1d3b3fe9eddac0fe7f7e/yande.re%20789208%20tagme.jpg</a></p>
+<p>这两个有什么关系</p>
+<p>可以拆分成<a target="_blank" rel="noopener" href="https://assets.yande.re/data/preview/">https://assets.yande.re/data/preview/</a> +6b/78/6b78f654de9c1d3b3fe9eddac0fe7f7e.jpg</p>
+<p><a target="_blank" rel="noopener" href="https://files.yande.re/image/+6b78f654de9c1d3b3fe9eddac0fe7f7e+yande.re%20789208%20tagme.jpg">https://files.yande.re/image/+6b78f654de9c1d3b3fe9eddac0fe7f7e+yande.re%20789208%20tagme.jpg</a></p>
+<p>可以看到小图的中间“6b/78/6b78f654de9c1d3b3fe9eddac0fe7f7e”构成了大图中间的“6b78f654de9c1d3b3fe9eddac0fe7f7e”，那么大图的后面部分”yande.re%20789208%20tagme.jpg“在哪。</p>
+<p>我又观察了其他图片然后打开了，结论是大图后面的部分无法找到，而且当我刷新了大图的页面发现大图后面部分改变了</p>
+<p>大图的链接变成了<a target="_blank" rel="noopener" href="https://files.yande.re/image/6b78f654de9c1d3b3fe9eddac0fe7f7e/yande.re%20789208%20genshin_impact%20keqing_%28genshin_impact%29%20somna.jpg">https://files.yande.re/image/6b78f654de9c1d3b3fe9eddac0fe7f7e/yande.re%20789208%20genshin_impact%20keqing_%28genshin_impact%29%20somna.jpg</a></p>
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210521p3.png" alt="大图页面"></p>
+<p>我充分理解了我无法通过小图来获取目标地址。（我猜测当我点击了小图的链接进入大图页面，大图的链接后面就会发生变化）<br>所以我还是老老实实通过小图的链接地址进入大图页面然后从中提取目标地址好了</p>
+<h2 id="python"><a href="#python" class="headerlink" title="python"></a>python</h2><p>我也不会python花了几小时在网上看了看怎么循环怎么判断之类的语法<br>用到了<code>requests</code>和<code>BeautifulSoup</code>两个模块，<code>requests</code>是用来发送请求，<code>BeautifulSoup</code>用来解析拿到的html页面，node上也有类似的工具但是实际使用后个人认为python方便很多。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">import requests //请求</span><br><span class="line">from bs4 import BeautifulSoup //解析</span><br><span class="line">import urllib3.contrib.pyopenssl //意义不明</span><br><span class="line">urllib3.contrib.pyopenssl.inject_into_urllib3()</span><br><span class="line">requests.packages.urllib3.disable_warnings()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 请求的请求头代理</span></span><br><span class="line">headers = &#123;<span class="string">&quot;user-agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36&quot;</span>&#125;</span><br><span class="line">proxies = &#123;<span class="string">&#x27;http&#x27;</span>: <span class="string">&#x27;http://localhost:7890&#x27;</span>,<span class="string">&#x27;https&#x27;</span>: <span class="string">&#x27;http://localhost:7890&#x27;</span>&#125;</span><br><span class="line"><span class="comment"># 下载完成第几张图片</span></span><br><span class="line">sum = 0</span><br><span class="line"><span class="comment"># 保存到本地什么文件夹</span></span><br><span class="line">URL = <span class="string">&quot;D:/python/hxd/&quot;</span></span><br><span class="line"><span class="comment"># 可以爬取的网站</span></span><br><span class="line">yande = <span class="string">&quot;https://yande.re/post?page=3&amp;tags=yabuki_kentarou&quot;</span></span><br><span class="line"><span class="comment"># 封装好请求</span></span><br><span class="line">def get_html(url):</span><br><span class="line">    html = requests.get(url,proxies=proxies,verify=False,headers=headers)</span><br><span class="line">    <span class="built_in">return</span> html</span><br><span class="line"></span><br><span class="line"> html = BeautifulSoup(get_html(konachan).content, <span class="string">&#x27;lxml&#x27;</span>)</span><br><span class="line"> <span class="keyword">for</span> span <span class="keyword">in</span> html.find_all(<span class="string">&quot;span&quot;</span>,&#123;<span class="string">&quot;class&quot;</span>:&#123;<span class="string">&quot;plid&quot;</span>&#125;&#125;):</span><br><span class="line">     <span class="built_in">print</span>(span)</span><br><span class="line">     html = BeautifulSoup(get_html(span.get_text().split(<span class="string">&quot; &quot;</span>)[1]).content, <span class="string">&#x27;lxml&#x27;</span>)</span><br><span class="line">     contentUrl = html.find(<span class="string">&quot;a&quot;</span>,&#123;<span class="string">&quot;class&quot;</span>:&#123;<span class="string">&quot;original-file-unchanged&quot;</span>&#125;&#125;) <span class="keyword">if</span> html.find(<span class="string">&quot;a&quot;</span>,&#123;<span class="string">&quot;class&quot;</span>:&#123;<span class="string">&quot;original-file-unchanged&quot;</span>&#125;&#125;) <span class="keyword">else</span> html.find(<span class="string">&quot;a&quot;</span>,&#123;<span class="string">&quot;class&quot;</span>:&#123;<span class="string">&quot;original-file-changed&quot;</span>&#125;&#125;) </span><br><span class="line">     with open (URL+contentUrl.get(<span class="string">&quot;href&quot;</span>).split(<span class="string">&quot;/&quot;</span>)[4]+<span class="string">&quot;.&quot;</span>+contentUrl.get(<span class="string">&quot;href&quot;</span>).split(<span class="string">&quot;.&quot;</span>)[3],<span class="string">&quot;wb&quot;</span>) as f :</span><br><span class="line">         f.write(get_html(contentUrl.get(<span class="string">&quot;href&quot;</span>)).content)</span><br><span class="line">         sum = sum + 1</span><br><span class="line">         <span class="built_in">print</span>(contentUrl.get(<span class="string">&quot;href&quot;</span>))</span><br><span class="line">         <span class="built_in">print</span>(<span class="string">&quot;第&quot;</span>+str(sum)+<span class="string">&quot;张下载完成&quot;</span>)</span><br></pre></td></tr></table></figure>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="http://o5danna.github.io">o5danna</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="nextSlogan" href="/2021/05/14/%E5%8D%9A%E5%AE%A2%E4%B8%BB%E9%A2%98%E7%9A%84header%E6%A0%B7%E5%BC%8F/" title="博客主题的header样式"><span>NextPost ></span><br><span class="nextTitle">博客主题的header样式</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>
