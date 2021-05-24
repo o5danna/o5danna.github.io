@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="o5danna"><meta name="renderer" content="webkit"><meta name="copyright" content="o5danna"><meta name="keywords" content="o5danna"><meta name="description" content="o5danna"><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>用python写爬虫（二） · o5danna's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/o5_ico.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/o5danna.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">o5danna</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg3.jpg);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">o5danna's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">用python写爬虫（二）</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-05-24</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="python"> python</a></span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>刚立的flag说可能不会有二就打脸了，问题是这样的，我在下载了图片之后有几率会出现图片损坏，大概在4k来张图里面会有三四张图片损坏，然后我命名是网站+图片编码+格式拼接的，很轻易拿到图片地址，我打开了损坏图片的地址也能正常显示，原因没找到（个人猜测是公司网络问题），但是解决办法有了</p>
+<span id="more"></span>
+
+<h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p>首先删除损坏图片然后遍历本地文件如果有和目标网络重名的显示“已存在该图片”不进行下载，总而言之就是判断一下本地是否存在该图片了。</p>
+<h2 id="代码部分"><a href="#代码部分" class="headerlink" title="代码部分"></a>代码部分</h2><p>就是引用了os模块加了个判断</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">import requests</span><br><span class="line">from bs4 import BeautifulSoup</span><br><span class="line"><span class="comment"># import urllib3</span></span><br><span class="line">import urllib3.contrib.pyopenssl</span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line">urllib3.contrib.pyopenssl.inject_into_urllib3()</span><br><span class="line">requests.packages.urllib3.disable_warnings()</span><br><span class="line"><span class="comment"># 请求的请求头代理</span></span><br><span class="line">headers = &#123;<span class="string">&quot;user-agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36&quot;</span>&#125;</span><br><span class="line">proxies = &#123;<span class="string">&#x27;http&#x27;</span>: <span class="string">&#x27;http://localhost:7890&#x27;</span>,<span class="string">&#x27;https&#x27;</span>: <span class="string">&#x27;http://localhost:7890&#x27;</span>&#125;</span><br><span class="line"><span class="comment"># 下载完成第几张图片</span></span><br><span class="line">sum = 0</span><br><span class="line"><span class="comment"># 保存到本地什么文件夹</span></span><br><span class="line">URL = <span class="string">&quot;D:/python/hxd/&quot;</span></span><br><span class="line"><span class="comment">#目标网站</span></span><br><span class="line">yande = <span class="string">&quot;https://yande.re/post?page=1&quot;</span></span><br><span class="line"><span class="comment">#发送请求</span></span><br><span class="line">def get_html(url):</span><br><span class="line">    html = requests.get(url,proxies=proxies,verify=False,headers=headers)</span><br><span class="line">    <span class="built_in">return</span> html</span><br><span class="line"><span class="comment">#检测本地是否已经有了这张图片，有就不存，没有就存</span></span><br><span class="line">def get_contentUrl(url,name):</span><br><span class="line">    global sum</span><br><span class="line">    <span class="keyword">for</span> files <span class="keyword">in</span> os.walk(url, topdown=False):</span><br><span class="line">        <span class="keyword">if</span> name <span class="keyword">in</span> files[2]:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;已存在该图片&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            with open (url+name,<span class="string">&quot;wb&quot;</span>) as f :</span><br><span class="line">                <span class="comment"># f.write(get_html(contentUrl.get(&quot;href&quot;)).content)</span></span><br><span class="line">                f.write(get_html(<span class="string">&quot;https:&quot;</span>+contentUrl.get(<span class="string">&quot;href&quot;</span>)).content)</span><br><span class="line">                sum = sum + 1</span><br><span class="line">                <span class="built_in">print</span>(contentUrl.get(<span class="string">&quot;href&quot;</span>))</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;第&quot;</span>+str(sum)+<span class="string">&quot;张下载完成&quot;</span>)</span><br><span class="line"><span class="comment">#下面没啥改动了就是调用了一下</span></span><br><span class="line"> html = BeautifulSoup(get_html(yande).content, <span class="string">&#x27;lxml&#x27;</span>)</span><br><span class="line"> <span class="keyword">for</span> span <span class="keyword">in</span> html.find_all(<span class="string">&quot;span&quot;</span>,&#123;<span class="string">&quot;class&quot;</span>:&#123;<span class="string">&quot;plid&quot;</span>&#125;&#125;):</span><br><span class="line">     html = BeautifulSoup(get_html(span.get_text().split(<span class="string">&quot; &quot;</span>)[1]).content, <span class="string">&#x27;lxml&#x27;</span>)</span><br><span class="line">     contentUrl = html.find(<span class="string">&quot;a&quot;</span>,&#123;<span class="string">&quot;class&quot;</span>:&#123;<span class="string">&quot;original-file-unchanged&quot;</span>&#125;&#125;) <span class="keyword">if</span> html.find(<span class="string">&quot;a&quot;</span>,&#123;<span class="string">&quot;class&quot;</span>:&#123;<span class="string">&quot;original-file-unchanged&quot;</span>&#125;&#125;) <span class="keyword">else</span> html.find(<span class="string">&quot;a&quot;</span>,&#123;<span class="string">&quot;class&quot;</span>:&#123;<span class="string">&quot;original-file-changed&quot;</span>&#125;&#125;) </span><br><span class="line">     get_contentUrl(URL,contentUrl.get(<span class="string">&quot;href&quot;</span>).split(<span class="string">&quot;/&quot;</span>)[4]+<span class="string">&quot;.&quot;</span>+contentUrl.get(<span class="string">&quot;href&quot;</span>).split(<span class="string">&quot;.&quot;</span>)[4])</span><br></pre></td></tr></table></figure>
+
+<h2 id="os模块"><a href="#os模块" class="headerlink" title="os模块"></a>os模块</h2><p><code>os.walk()</code>用类似于深度遍历的方式遍历文件夹中的子文件夹以及文件。我直接举个例子</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">imagePath = <span class="string">&quot;D:\python&quot;</span></span><br><span class="line"><span class="keyword">for</span> root, <span class="built_in">dirs</span>, files <span class="keyword">in</span> os.walk(imagePath):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;文件夹的本身的地址是&quot;</span>+root)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;文件夹中所有的目录的名字&quot;</span>+str(<span class="built_in">dirs</span>))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;该文件夹中所有的文件&quot;</span>+str(files))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;--------------------------------&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>下面是输出的值</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">文件夹的本身的地址是D:\python</span><br><span class="line">文件夹中所有的目录的名字[<span class="string">&#x27;hxd&#x27;</span>, <span class="string">&#x27;hxdok&#x27;</span>, <span class="string">&#x27;img&#x27;</span>, <span class="string">&#x27;tolove&#x27;</span>, <span class="string">&#x27;toloveok&#x27;</span>, <span class="string">&#x27;yande&#x27;</span>]</span><br><span class="line">该文件夹中所有的文件[<span class="string">&#x27;demo.py&#x27;</span>, <span class="string">&#x27;file.py&#x27;</span>, <span class="string">&#x27;foreach.html&#x27;</span>, <span class="string">&#x27;index-bg2.jpg&#x27;</span>, <span class="string">&#x27;promise,async,await.html&#x27;</span>, <span class="string">&#x27;set Map.html&#x27;</span>, <span class="string">&#x27;index.html&#x27;</span>, <span class="string">&#x27;滑</span></span><br><span class="line"><span class="string">轮css.html&#x27;</span>, <span class="string">&#x27;防抖节流.html&#x27;</span>]</span><br><span class="line">--------------------------------</span><br><span class="line">文件夹的本身的地址是D:\python\hxd</span><br><span class="line">文件夹中所有的目录的名字[<span class="string">&#x27;测试&#x27;</span>]</span><br><span class="line">该文件夹中所有的文件[]</span><br><span class="line">--------------------------------</span><br><span class="line">文件夹的本身的地址是D:\python\hxd\测试</span><br><span class="line">文件夹中所有的目录的名字[]</span><br><span class="line">该文件夹中所有的文件[]</span><br><span class="line">--------------------------------</span><br><span class="line">文件夹的本身的地址是D:\python\hxdok</span><br><span class="line">文件夹中所有的目录的名字[]</span><br><span class="line">该文件夹中所有的文件[<span class="string">&#x27;1621575901&amp;m.jpg&#x27;</span>]</span><br><span class="line">以下省略</span><br></pre></td></tr></table></figure>
+
+<p>可以根据上面的内容猜测我什么文件夹下面分别有什么和下面图一样就对了</p>
+<p><img src="https://raw.githubusercontent.com/o5danna/myself_img/master/20210524p1.png" alt=" "></p>
+<p>hxd下面只有一个叫“测试”的文件夹，</p>
+<p>hxdok下面全是图片</p>
+<p>img下全是图片</p>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="http://o5danna.github.io">o5danna</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="nextSlogan" href="/2021/05/21/%E8%AF%95%E7%9D%80%E7%94%A8python%E6%9D%A5%E7%88%AC%E8%99%AB%EF%BC%88%E4%B8%80%EF%BC%89/" title="用python写爬虫（一）"><span>NextPost ></span><br><span class="nextTitle">用python写爬虫（一）</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>
