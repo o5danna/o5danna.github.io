@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="o5danna"><meta name="renderer" content="webkit"><meta name="copyright" content="o5danna"><meta name="keywords" content="o5danna"><meta name="description" content="o5danna"><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>网站的反爬策略 · o5danna's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/o5_ico.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/o5danna.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">o5danna</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg3.jpg);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">o5danna's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">网站的反爬策略</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-05-26</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="python"> python</a></span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>自己写爬虫自然会遇到各种各样的网站的反爬，然后自己就会想办法绕过规则，一来一往，一招一式，很是有趣。</p>
+<span id="more"></span>
+
+<h2 id="封IP"><a href="#封IP" class="headerlink" title="封IP"></a>封IP</h2><p>返回403,503之类的大概率说明你ip被封了，如果某个用户访问了无数次，管理员就认为你是电脑所以直接封杀ip。<br><strong>解决方法</strong>就是添加多个ip请求的时候随机ip</p>
+<h2 id="懒加载"><a href="#懒加载" class="headerlink" title="懒加载"></a>懒加载</h2><p>懒加载除了能够加快页面的渲染速度也能够，还能防止爬虫一次性爬到大量数据<br><strong>解决方法</strong>部分懒加载是根据page，可以使用开发者工具观察能够发现每次懒加载都调用了一个接口，可以通过拼接网址比如httpsxxxx+变量名的方法来解决</p>
+<h2 id="验证码"><a href="#验证码" class="headerlink" title="验证码"></a>验证码</h2><p>访问到一定次数之后需要输入验证码才能够进行访问，这个目前没遇到过</p>
+<h2 id="Referer字段反爬"><a href="#Referer字段反爬" class="headerlink" title="Referer字段反爬"></a>Referer字段反爬</h2><p>请求头需要多个特定字段请求才能够返回数据，比如User-Agent、Referer等等<br><strong>解决方法</strong>请求的时候再请求头加上User-Agent、Referer等数据</p>
+<h2 id="限制下载量"><a href="#限制下载量" class="headerlink" title="限制下载量"></a>限制下载量</h2><p>推测是根据什么方法限制下载量，有的是限制每个ip每天请求多少次，有的是根据登陆用户限制每天能请求多少次<br><strong>解决方法</strong>限制ip的随机ip地址即可，限制用户请求的无法解决只能等管理员重置次数或者等到明天下周下个月都有可能</p>
+<h2 id="封cookies"><a href="#封cookies" class="headerlink" title="封cookies"></a>封cookies</h2><p>访问过后会发现cooike里面添加了一条setcookies，请求的时候请求头也需要带上这个值，当访问次数过多就会被封<br><strong>解决方法</strong>换个浏览器访问等待返回新的cooike下次请求拼新cooike就行了</p>
+<h2 id="图片地址动态改变"><a href="#图片地址动态改变" class="headerlink" title="图片地址动态改变"></a>图片地址动态改变</h2><p>网页都是缩略图，点击缩略图之后才会显示原图链接，而且会动态改变原图链接<br><strong>解决方法</strong>这个遇到的最多，一般是壁纸网站什么的，他会在首页放缩略图，运气好的话能够根据缩略图拼接网址就能够访问到原图地址，运气不好只能通过小图的参数拼接网址发送请求，获取得到网页再遍历网页获取原图链接，动态改变链接的规则有的是根据setcooies</p>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="http://o5danna.github.io">o5danna</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="nextSlogan" href="/2021/05/24/%E8%AF%95%E7%9D%80%E7%94%A8python%E6%9D%A5%E7%88%AC%E8%99%AB%EF%BC%88%E4%BA%8C%EF%BC%89/" title="用python写爬虫（二）"><span>NextPost ></span><br><span class="nextTitle">用python写爬虫（二）</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>
