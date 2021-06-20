@@ -1,0 +1,175 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><meta name="author" content="o5danna"><meta name="renderer" content="webkit"><meta name="copyright" content="o5danna"><meta name="keywords" content="o5danna"><meta name="description" content="o5danna"><meta name="Cache-Control" content="no-cache"><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><title>Cookie、sessionStorage、localStorage和token · o5danna's Blog</title><link rel="stylesheet" href="/css/style.css?v=2018.7.9"><link rel="stylesheet" href="/css/animation.css?v=2018.7.9"><link rel="icon" href="/img/assets/o5_ico.ico"><link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css?version=1.5.6"><!-- scripts--><script>(function( w ){
+  "use strict";
+  // rel=preload support test
+  if( !w.loadCSS ){
+    w.loadCSS = function(){};
+  }
+  // define on the loadCSS obj
+  var rp = loadCSS.relpreload = {};
+  // rel=preload feature support test
+  // runs once and returns a function for compat purposes
+  rp.support = (function(){
+    var ret;
+    try {
+      ret = w.document.createElement( "link" ).relList.supports( "preload" );
+    } catch (e) {
+      ret = false;
+    }
+    return function(){
+      return ret;
+    };
+  })();
+
+  // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+  // then change that media back to its intended value on load
+  rp.bindMediaToggle = function( link ){
+    // remember existing media attr for ultimate state, or default to 'all'
+    var finalMedia = link.media || "all";
+
+    function enableStylesheet(){
+      link.media = finalMedia;
+    }
+
+    // bind load handlers to enable media
+    if( link.addEventListener ){
+      link.addEventListener( "load", enableStylesheet );
+    } else if( link.attachEvent ){
+      link.attachEvent( "onload", enableStylesheet );
+    }
+
+    // Set rel and non-applicable media type to start an async request
+    // note: timeout allows this to happen async to let rendering continue in IE
+    setTimeout(function(){
+      link.rel = "stylesheet";
+      link.media = "only x";
+    });
+    // also enable media after 3 seconds,
+    // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+    setTimeout( enableStylesheet, 3000 );
+  };
+
+  // loop through link elements in DOM
+  rp.poly = function(){
+    // double check this to prevent external calls from running
+    if( rp.support() ){
+      return;
+    }
+    var links = w.document.getElementsByTagName( "link" );
+    for( var i = 0; i < links.length; i++ ){
+      var link = links[ i ];
+      // qualify links to those with rel=preload and as=style attrs
+      if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+        // prevent rerunning on link
+        link.setAttribute( "data-loadcss", true );
+        // bind listeners to toggle media back
+        rp.bindMediaToggle( link );
+      }
+    }
+  };
+
+  // if unsupported, run the polyfill
+  if( !rp.support() ){
+    // run once at least
+    rp.poly();
+
+    // rerun poly on an interval until onload
+    var run = w.setInterval( rp.poly, 500 );
+    if( w.addEventListener ){
+      w.addEventListener( "load", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    } else if( w.attachEvent ){
+      w.attachEvent( "onload", function(){
+        rp.poly();
+        w.clearInterval( run );
+      } );
+    }
+  }
+
+
+  // commonjs
+  if( typeof exports !== "undefined" ){
+    exports.loadCSS = loadCSS;
+  }
+  else {
+    w.loadCSS = loadCSS;
+  }
+}( typeof global !== "undefined" ? global : this ) );</script><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" defer></script><script src="/js/main.js?v=2018.7.9" defer></script><!-- fancybox--><link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'"><script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script><!-- busuanzi--><script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script><meta name="generator" content="Hexo 5.4.0"></head><body><section class="profile-close" id="cxo-profile"><div class="profile-avatar"><i class="fa fa-caret-left"></i><img src="/img/assets/o5danna.png"></div><!--.profile-saying
+  i.fa.fa-comment
+  .saying--><div class="cxo-profile-inner"><div class="profile-name">o5danna</div><div class="read-progress"></div></div></section><header id="cxo-intro" style="height: 70vh;background-image: url(/img/intro/index-bg3.jpg);"><nav id="cxo-intro-nav"><section><div class="intro-nav-title"><a href="/">o5danna's Blog</a></div><div class="intro-nav-label-box"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div><i class="fa fa-bars intro-nav-menu"><div class="intro-nav-drop"><a href="/">Home</a><a href="/about/">About</a><a href="/archives/">Archives</a><a href="/tags/">Tags</a></div></i><div class="clear"></div></section></nav><h1 class="post-title">Cookie、sessionStorage、localStorage和token</h1><div class="post-intros"><div class="post-intro-meta"><span class="post-intro-time"><i class="post-intro-calendar fa fa-calendar"></i><span>2021-06-20</span></span><span class="post-intro-tags"><a class="intro-tag fa fa-tag" href="javascript:void(0)" date-tags="js"> js</a></span></div></div></header><article class="cxo-up" id="cxo-content-outer"><section id="cxo-content-inner"><article class="article-entry" id="post"><p>webstorage是本地存储，存储在客户端，包括localStorage和sessionStorage<br>Cookie在HTTP请求发送Set-Cookie HTTP头作为响应的一部分<br>Token是多用户下处理认证的最好方式</p>
+<span id="more"></span>
+
+<p>这些东西经常用但是很少总结，下面就是总结一下浏览器的缓存和客户端与服务器交互的时候是如何验证是否是同一个人的</p>
+<h2 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h2><p><strong>构成</strong><br>一般由以下几部分组成</p>
+<ul>
+<li>名称(name必选)：一个唯一确定Cookie的名称，部分大小写，Cookie的名字必须是经过URL编码的，一般可以采用某个前缀在加上当前时间的做法，这样的话名称能够确保是唯一的，也比较方便。</li>
+<li>值(value必选)：存储在Cookie中的字符串值，必须经过被URL编码</li>
+<li>失效时间(expire可选)：表示Cookie何时应该被删除的时间戳，这个日期是GMT格式的日期，如果设置是以前的时间，Cookie会被立刻删除。</li>
+<li>路径(path可选)：指定域中的那个路径，应该想服务器发送Cookie，/ 表示没有限制</li>
+<li>安全标志(secure可选)：指定以后，Cookie只有在使用SSL连接的时候才可以发送到服务器。</li>
+<li>域(domain可选)：对于哪个域是有效的，如果没有设置的话，默认来自设置Cookie的那个域.</li>
+</ul>
+<p><strong>作用</strong><br>主要用于保存登录信息，一般用在</p>
+<ul>
+<li>购物车（网购）</li>
+<li>自动登录（登录账号时的自动登录）</li>
+<li>大数据</li>
+<li>记住登录状态</li>
+</ul>
+<p><strong>优点</strong></p>
+<ul>
+<li>通过良好的编程，控制保存在cookie中的session对象的大小</li>
+<li>通过加密和安全传输技术（SSL），减少cookie被破解的可能性</li>
+<li>只有在cookie中存放不敏感的数据，即使被盗取也不会有很大的损失</li>
+<li>控制cookie的生命期，使之不会永远有效。这样的话偷盗者很可能拿到的就 是一个过期的cookie</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>不同的浏览器有不同的cookie个数规定，兼容性不好（有存50条的有存20条的，版本不同允许存的数量也不同）</li>
+<li>有些状态不可能保存在客户端。例如，为了防止重复提交表单，我们需要在服务端保存一个计数器。若吧计数器保存在客户端，则起不到什么作用</li>
+<li>安全性问题。如果cookie被人拦掉了，那个人就可以获取到所有session信息。加密的话也不起什么作用</li>
+</ul>
+<p><strong>常用操作</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">建立</span><br><span class="line"><span class="keyword">function</span> setCookie(name,value,expiredate,domain,path,secure)&#123;</span><br><span class="line">    var cookieText=escape(name)+<span class="string">&quot;=&quot;</span>+escape(value);</span><br><span class="line">    <span class="keyword">if</span>(expiredate)&#123;</span><br><span class="line">        var exdate=new Date();</span><br><span class="line">        exdate.setDate(exdate.getDate()+expiredate);</span><br><span class="line">        cookieText+=<span class="string">&quot;;expires=&quot;</span>+exdate.toGMTString();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(domain)&#123;</span><br><span class="line">        cookieText+=<span class="string">&quot;;domain=&quot;</span>+domain;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(path)&#123;</span><br><span class="line">        cookieText+=<span class="string">&quot;;path=&quot;</span>+path;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(secure)&#123;</span><br><span class="line">        cookieText+=<span class="string">&quot;;secure&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    document.cookie=cookieText;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">传参</span><br><span class="line">setCookie(<span class="string">&quot;tom&quot;</span>,<span class="string">&quot;i am tom&quot;</span>,<span class="string">&quot;June 20,2021&quot;</span>);</span><br><span class="line">查询</span><br><span class="line"><span class="keyword">function</span> getCookie(name)&#123;</span><br><span class="line">    var cookieName=encodeURIComponent(name)+<span class="string">&quot;=&quot;</span>,</span><br><span class="line">    cookieStart=document.cookie.indexOf(cookieName),</span><br><span class="line">    cookieValue=null;</span><br><span class="line">    <span class="keyword">if</span>(cookieStart&gt;-1)&#123;</span><br><span class="line">        var cookieEnd=document.cookie.indexOf(<span class="string">&quot;;&quot;</span>,cookieStart);</span><br><span class="line">        <span class="keyword">if</span>(cookieEnd==-1)&#123;</span><br><span class="line">            cookieEnd=document.cookie.Length;</span><br><span class="line">        &#125;</span><br><span class="line">        cookieValue=decodeURIComponent(document.cookie.substring(cookieStart+document.cookie.length,cookieEnd));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">return</span> cookieValue;</span><br><span class="line">&#125;</span><br><span class="line">删除</span><br><span class="line"><span class="keyword">function</span> deCookie(name,value,expiredate,domain,path,secure)&#123;</span><br><span class="line">    this.setCookie(name,<span class="string">&quot;&quot;</span>,new Date(0),domain,path,secure);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="sessionStorage和localStorage"><a href="#sessionStorage和localStorage" class="headerlink" title="sessionStorage和localStorage"></a>sessionStorage和localStorage</h2><p>这两个本质上其实是为了储存本地数据<br>sessionStorage（会话存储）储存大小为5MB，关闭页面或者浏览器之后会被清除，不参与和服务器的通信。<br>localStorage（本地存储）储存大小为5MB，生命周期是永久，除非除非用户显示在浏览器提供的UI上清除localStorage信息，否则这些信息将永远存在，也不参与和服务器的通信<br>其中不同浏览器无法共享localStorage或sessionStorage中的信息。相同浏览器的不同页面间可以共享相同的 localStorage（页面属于相同域名和端口），但是不同页面或标签页间无法共享sessionStorage的信息。这里需要注意的是，页面及标 签页仅指顶级窗口，如果一个标签页包含多个iframe标签且他们属于同源页面，那么他们之间是可以共享sessionStorage的<br><strong>使用场景</strong><br>localStoragese：常用于长期登录（+判断用户是否已登录），适合长期保存在本地的数据，而sessionStorage：敏感账号一次性登录<br><strong>WebStorage的优点</strong></p>
+<ul>
+<li>存储空间更大。在IE下每个独立存储空间为10M，其它浏览器存储空间略有不同，但可以肯定的是至少要比cookie要大很多。</li>
+<li>存储内容不会与服务器发生任何交互，数据仅仅单纯地存储在本地。不用担心对服务器数据的影响！</li>
+<li>对于那种只需要在用户浏览一组页面期间保存而关闭浏览器后就可以丢弃的数据，sessionStorage会非常方便</li>
+<li>有的数据存储在WebStorage上，再加上浏览器本身的缓存。获取数据时可以从本地获取会比从服务器端获取快得多，所以速度更快</li>
+</ul>
+<p><strong>WebStorage的缺点</strong></p>
+<ul>
+<li>存储在本地的数据未加密且永远不会过期，容易造成隐私泄漏</li>
+<li>存在伪造问题</li>
+</ul>
+<p><strong>WebStorage提供了一些方法，数据操作比cookie方便</strong></p>
+<ul>
+<li>setItem (key, value) —— 保存数据，以键值对的方式储存信息。</li>
+<li>getItem (key) —— 获取数据，将键值传入，即可获取到对应的value值。</li>
+<li>removeItem (key) —— 删除单个数据，根据键值移除对应的信息。</li>
+<li>clear () —— 删除所有的数据</li>
+<li>key (index) —— 获取某个索引的key<br>下面是简单的例子</li>
+</ul>
+<p><strong>sessionStorage设置和获取数据</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">//保存数据有3种方法：</span><br><span class="line">sessionStorage.setItem(<span class="string">&quot;key&quot;</span>,<span class="string">&quot;value&quot;</span>);</span><br><span class="line">//或</span><br><span class="line">sessionStorage.key=<span class="string">&quot;value&quot;</span>;</span><br><span class="line">//或</span><br><span class="line">sessionStorage[<span class="string">&quot;key&quot;</span>]=<span class="string">&quot;value&quot;</span>;</span><br><span class="line"></span><br><span class="line">//读取数据的3种方法，将数据赋值给变量v</span><br><span class="line">var v=sessionStorage.getItem(<span class="string">&quot;key&quot;</span>);</span><br><span class="line">//或</span><br><span class="line">var v=sessionStorage.key;</span><br><span class="line">//或</span><br><span class="line">var v=sessionStorage[<span class="string">&quot;key&quot;</span>];</span><br></pre></td></tr></table></figure>
+
+<p><strong>localStorage设置和获取数据</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">//保存数据有3种方法：</span><br><span class="line">localStorage.setItem(<span class="string">&quot;key&quot;</span>,<span class="string">&quot;value&quot;</span>);</span><br><span class="line">//或</span><br><span class="line">localStorage.key=<span class="string">&quot;value&quot;</span>;</span><br><span class="line">//或</span><br><span class="line">localStorage[<span class="string">&quot;key&quot;</span>]=<span class="string">&quot;value&quot;</span>;</span><br><span class="line"></span><br><span class="line">//读取数据的3种方法，将数据赋值给变量v</span><br><span class="line">var v=localStorage.getItem(<span class="string">&quot;key&quot;</span>);</span><br><span class="line">//或</span><br><span class="line">var v=localStorage.key;</span><br><span class="line">//或</span><br><span class="line">var v=localStorage[<span class="string">&quot;key&quot;</span>];</span><br></pre></td></tr></table></figure>
+
+<h2 id="token"><a href="#token" class="headerlink" title="token"></a>token</h2><p>token是用来验证用户的，是一个验证的机制，不同于上面的那三个全都是一种存储机制比如说一个服务器同时有用户a和用户，服务器如何分辨哪个是a的请求哪个是b的请求，结合前面说的东西，可以简单思考一下。<br>简单的说token就是你的身份证，加密过的数据存储在Cookie、sessionStorage、localStorage中都可以，当然如果token被窃取了那么别人是不是可以伪造是你的请求呢，很遗憾服务器仍然会认为是你正常返回请求<br><strong>身份验证过程</strong><br>虽然说了能够进行伪造但是在很早的公钥和自私钥的时候说过本地会生成一个密钥，如果保护不好密钥被窃取别人依然可以伪造成你的身份来发文，因此token是一种相对来说比较安全的身份验证机制，为了防止伪造token一般都是有时效的。</p>
+<ol>
+<li>客户通过用户名和密码请求服务器</li>
+<li>服务器进行验证用户名和密码</li>
+<li>服务器返回一个token并且返回数据</li>
+<li>客户端存储token并且每次发送请求都携带token</li>
+<li>服务器验证并且返回数据</li>
+</ol>
+<p><strong>安全性</strong></p>
+<ul>
+<li>请求发送token不在发送cookie能够防止CSRF。</li>
+<li>token是有时效的</li>
+</ul>
+</article><!-- lincense--><div class="license-wrapper"><p> <span>Author:  </span><a href="http://o5danna.github.io">o5danna</a></p><p> <span>Copyright:  </span><span>All articles in this blog are licensed under <a rel="license noopener" target="_blank" href="https://creativecommons.org/licenses/by-nc-nd/3.0">CC BY-NC-SA 3.0</a> unless stating additionally.</span></p></div><div class="post-paginator"><a class="nextSlogan" href="/2021/06/18/%E5%85%B3%E4%BA%8E%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E6%80%9D%E8%80%83/" title="关于人工智能的思考"><span>NextPost ></span><br><span class="nextTitle">关于人工智能的思考</span></a><div class="clear"></div></div><div id="comment"></div></section></article><footer id="cxo-footer-outer"><div id="cxo-footer-inner"><p class="footer-container"><span>Site by </span><a target="_blank" rel="noopener" href="http://hexo.io"><span>Hexo</span></a><span> | theme </span><a target="_blank" rel="noopener" href="https://github.com/Longlongyu/hexo-theme-Cxo"><span>Cxo</span></a></p><i class="fa fa-user"> </i><span id="busuanzi_value_site_uv"></span><span> | </span><i class="fa fa-eye"> </i><span id="busuanzi_value_site_pv"></span></div></footer><!-- catelog--><!-- top--><i class="fa fa-arrow-up close" id="go-up" aria-hidden="true"></i></body></html>
